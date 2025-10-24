@@ -29,6 +29,6 @@ Each version refines the art of command-line magic within Batocera. 🧞‍♂�
 
 ---
 
-### 💜 The Journey Continues...
+###  The Journey Continues...
 Each version brings the DjinnCade Terminal closer to perfection.  
 Your wishes, feedback, and pull requests guide the next summoning. ✨  
