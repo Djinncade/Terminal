@@ -23,7 +23,7 @@ Awesome — contributions are always welcome! ✨
 
 ---
 
-## 💜 Spirit of the Project
+## Spirit of the Project
 
 DjinnCade is built for the Batocera community — by fans, for fans.  
 Every contribution helps make the terminal a little more magical. 🧞‍♂️  
