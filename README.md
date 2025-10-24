@@ -33,7 +33,7 @@ After installation, you’ll have access to several DjinnCade commands that make
 | `djinn-cheats` | Opens the **Cheats & Tools Menu** — includes file tools (backup, restore, copy/move/delete, zip/unzip), SquashFS handling, and system info utilities. |
 | `djinn-help` | Displays the **DjinnCade Help Menu**, showing visible commands and quick usage tips. |
 
-🪄 *Developer and hidden commands exist but are not listed here (for advanced users only 😉).*
+🪄 *Extra commands exist but are not listed here 😉.*
 
 Everything runs from **one single script** — no extra dependencies needed besides `bash` and `dialog`.
 
