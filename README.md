@@ -1,27 +1,49 @@
 # 🧞 DjinnCade Terminal Setup V14
 
-A single-file installer that brings the **DjinnCade Terminal Addon** to your Batocera system — complete with custom themes, dialog-based menus, backups, and a touch of magic. ✨
+A single-file installer that brings the **DjinnCade Terminal Addon** to your Batocera system — complete with custom themes, dialog-based menus, backups, and a touch of magic. ✨  
+
+This setup adds a custom DjinnCade-styled terminal experience, blending functionality and flair right inside Batocera.
 
 ---
 
 ## 🎮 What It Does
-The **DjinnCade Terminal Addon** enhances Batocera’s command line with:
-- Interactive dialog menus and color themes  
-- Safe backup and restore options using SquashFS  
-- File browsing, copy, and delete tools  
-- Custom PS1 prompt styling  
-- System info display (uptime, version, storage)  
-- A themed installer/uninstaller system  
 
-All packed inside one self-contained script — no external dependencies beyond `bash` and `dialog`.
+The **DjinnCade Terminal Addon** enhances Batocera’s terminal with:
+
+- 🧱 Interactive dialog-based menus  
+- 🎨 Color themes and style customization  
+- 💾 Safe backup and restore tools (SquashFS-based)  
+- 🧭 File manager for browse/copy/delete  
+- 💬 Custom PS1 prompt styling  
+- ⚙️ System info display (uptime, version, storage)  
+- 🔄 Themed installer and uninstaller system  
+- 🧞 Built-in command shortcuts for quick access to every feature  
+
+---
+
+### 🎮 New Custom Commands List
+
+After installation, you’ll have access to several DjinnCade commands that make managing and customizing Batocera faster and easier.  
+
+| Command | Function |
+|----------|-----------|
+| `summon-djinn` | Switches your terminal prompt to **Djinn Mode** (🔮 symbol + alternate PS1 colors). |
+| `banish-djinn` | Reverts the terminal back to normal mode. |
+| `djinn-style` | Opens the **Style Selector** — customize PS1 colors, dialog themes, and overall terminal look. |
+| `djinn-cheats` | Opens the **Cheats & Tools Menu** — includes file tools (backup, restore, copy/move/delete, zip/unzip), SquashFS handling, and system info utilities. |
+| `djinn-help` | Displays the **DjinnCade Help Menu**, showing visible commands and quick usage tips. |
+
+🪄 *Developer and hidden commands exist but are not listed here (for advanced users only 😉).*
+
+Everything runs from **one single script** — no extra dependencies needed besides `bash` and `dialog`.
 
 ---
 
 ## ⚙️ Installation
 
-1. Download or copy the setup script anywhere on your Batocera system —  
-   it can be in `/userdata/`, `/share/`, or any folder you like.
+1. Copy or download the setup script anywhere on your Batocera system —  
+   you can place it in `/userdata/`, `/share/`, or any other folder you like.
 
-2. Open a terminal or connect via SSH, then make the script executable:
+2. Open a terminal or connect via SSH, then make it executable:
    ```bash
    chmod +x djinncade-terminal-setup-V14.sh
