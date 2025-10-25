@@ -1,9 +1,11 @@
 #!/bin/bash
-# === DJINN TERMINAL MASTER INSTALLER V14.2 — Beast Edition (FIXED) ===
-# DjinnCade Terminal Setup V14.2
+# === DJINN TERMINAL MASTER INSTALLER V14.3 — Beast Edition (ENHANCED) ===
+# DjinnCade Terminal Setup V14.3
 # Copyright (c) 2025 DjinnCade Project
 # Licensed under the MIT License – see the LICENSE file for details.
 #
+# Added: network-tools command with Wi-Fi status and speed test
+# Added: keyboard-setup command for region/layout configuration
 # Fixed: ALL file operations run from /userdata directory
 # Removed: move, copy, delete functions
 # Added: auto-cmd-wine command
@@ -31,7 +33,7 @@ log() { printf '%s %s\n' "$(date '+%F %T')" "$*" >> "$LOG_FILE"; }
 # Dialog-theme chooser (install-time only)
 # -----------------------------
 clear
-dialog --backtitle "🧞 Djinn Installer v14.2" --yesno "Pick a dialog theme now? (This sets dialog colors only; PS1/terminal colors are handled by djinn-style later.)" 10 60
+dialog --backtitle "🧞 Djinn Installer v14.3" --yesno "Pick a dialog theme now? (This sets dialog colors only; PS1/terminal colors are handled by djinn-style later.)" 10 60
 if [ $? -eq 0 ]; then
   THEME=$(dialog --stdout --backtitle "Djinn Dialog Themes" --menu "Choose dialog theme:" 16 70 6 \
     1 "Emerald Blaze (Green on Black)" \
@@ -57,7 +59,7 @@ esac
 
 # Default PS1 preset
 cat > "$STYLE_CONF" <<EOF
-# djinn-style config (written by installer v14.1)
+# djinn-style config (written by installer v14.3)
 PS1_PRESET="Classic Djinn"
 PROMPT_SYMBOL_COLOR="RED"
 PROMPT_USER_COLOR="CYAN"
@@ -75,11 +77,13 @@ EOF
 log "Installer: wrote initial style config to $STYLE_CONF (theme $THEME)"
 
 # -----------------------------
-# Write runtime custom.sh - FIXED FILE OPERATIONS VERSION
+# Write runtime custom.sh - ENHANCED VERSION
 # -----------------------------
 cat > "$CUSTOM_SH" <<'EOF'
 #!/bin/bash
-# Djinn Terminal v14.2 — Beast Edition (runtime) - FIXED FILE OPS
+# Djinn Terminal v14.3 — Beast Edition (runtime) - ENHANCED
+# Added: network-tools command with Wi-Fi status and speed test
+# Added: keyboard-setup command for region/layout configuration
 # Fixed: ALL file operations run from /userdata directory
 # Removed: move, copy, delete functions
 # Added: auto-cmd-wine command
@@ -187,7 +191,13 @@ show_banner() {
 
 # FIXED: file browser with proper path handling
 file_browser() {
-  local title="$1" start_dir="${2:-/userdata}" current_dir="$start_dir" sel path
+  local title="$1" start_dir="${2:-/userdata}" current_dir
+  # Ensure sensible default start_dir
+  if [ -z "$start_dir" ] || [ "$start_dir" = "." ] || [ "$start_dir" = ".parent" ]; then
+    start_dir="/userdata"
+  fi
+  current_dir="$start_dir"
+  local sel path
   while true; do
     items=()
     shopt -s nullglob 2>/dev/null || true
@@ -239,7 +249,7 @@ ensure_king_state() {
   if [ ! -f "$KING_STATE" ]; then
     cat > "$KING_STATE" <<K
 # enabled commands (space-separated)
-summon-djinn banish-djinn djinn-style djinn-cheats djinn-play djinn-king zynn djinn-help djinn-what auto-cmd-wine
+summon-djinn banish-djinn djinn-style djinn-cheats djinn-play djinn-king zynn djinn-help djinn-what auto-cmd-wine network-tools keyboard-setup
 K
   fi
 }
@@ -298,7 +308,7 @@ banish-djinn() {
 # FIXED: djinn-help and djinn-what with proper dialog clearing
 djinn-help() {
   require_enabled_or_die "djinn-help" || return 1
-  msg=$'Visible Commands:\n\nsummon-djinn\nbanish-djinn\ndjinn-style\ndjinn-cheats\ndjinn-help\nauto-cmd-wine\n'
+  msg=$'Visible Commands:\n\nsummon-djinn\nbanish-djinn\ndjinn-style\ndjinn-cheats\ndjinn-help\nauto-cmd-wine\nnetwork-tools\nkeyboard-setup\n'
   dialog --clear --backtitle "🧞 Djinn Help" --msgbox "$msg" 12 60
   clear
   show_banner
@@ -446,7 +456,7 @@ djinn-king() {
   require_enabled_or_die "djinn-king" || return 1
   ensure_king_state
   read_enabled_commands
-  all_cmds=(summon-djinn banish-djinn djinn-style djinn-cheats djinn-play djinn-king zynn djinn-help djinn-what auto-cmd-wine)
+  all_cmds=(summon-djinn banish-djinn djinn-style djinn-cheats djinn-play djinn-king zynn djinn-help djinn-what auto-cmd-wine network-tools keyboard-setup)
   opts=()
   for c in "${all_cmds[@]}"; do
     state=off
@@ -604,11 +614,307 @@ auto-cmd-wine() {
   show_banner
 }
 
+# NEW: Network Tools - Wi-Fi status and speed test
+network-tools() {
+  require_enabled_or_die "network-tools" || return 1
+  
+  while true; do
+    choice=$(dialog --clear --stdout --backtitle "🌐 Djinn Network Tools" --menu "Network Utilities" 15 60 5 \
+      1 "Wi-Fi Status & Networks" \
+      2 "Speed Test" \
+      3 "Network Interfaces" \
+      4 "Ping Test" \
+      5 "Exit") || { clear; show_banner; return 0; }
+    
+    case "$choice" in
+      1)
+        # Wi-Fi status and scanning
+        if command -v iwconfig >/dev/null 2>&1; then
+          wifi_info=$(iwconfig 2>/dev/null | grep -E "ESSID|Link Quality|Frequency" | head -5)
+          if [ -n "$wifi_info" ]; then
+            dialog --clear --title "📡 Wi-Fi Status" --msgbox "$wifi_info" 12 60
+          else
+            dialog --clear --msgbox "No Wi-Fi interface found or not connected." 8 50
+          fi
+          
+          # Scan for networks if possible
+          dialog --clear --yesno "Scan for available Wi-Fi networks? (This may take a moment)" 8 50
+          if [ $? -eq 0 ]; then
+            temp_scan="/tmp/wifi_scan.txt"
+            dialog --clear --infobox "Scanning for Wi-Fi networks..." 5 40
+            iwlist scan 2>/dev/null | grep -E "ESSID|Quality" | head -20 > "$temp_scan" 2>/dev/null || echo "Scan failed or no permissions" > "$temp_scan"
+            dialog --clear --title "📶 Available Networks" --textbox "$temp_scan" 20 70
+            rm -f "$temp_scan"
+          fi
+        else
+          dialog --clear --msgbox "Wireless tools not available." 7 40
+        fi
+        ;;
+      
+      2)
+        # Enhanced Speed Test with 100MB file and proper MB/s calculation
+        dialog --clear --yesno "This will test download speed using wget.\nIt will download a 100MB test file to /userdata/.\nContinue?" 10 50
+        if [ $? -eq 0 ]; then
+          TEST_FILE="/userdata/speedtest_100mb.file"
+          TEST_URL="http://ipv4.download.thinkbroadband.com/100MB.zip"
+          
+          (
+            echo "Starting speed test..."
+            echo "Downloading 100MB test file to: $TEST_FILE"
+            start_time=$(date +%s.%N)
+            
+            # Download with progress tracking
+            if wget -O "$TEST_FILE" --progress=dot:mega "$TEST_URL" 2>&1 | grep --line-buffered -o '[0-9]*%' | while read -r line; do
+              percent=${line%\%}
+              echo "$percent"
+              echo "XXX"
+              echo "Downloading test file... $line"
+              echo "Download path: $TEST_FILE"
+              echo "XXX"
+            done; then
+              end_time=$(date +%s.%N)
+              duration=$(echo "$end_time - $start_time" | bc -l)
+              
+              # Calculate actual MB/s (100MB / seconds)
+              if command -v bc >/dev/null 2>&1; then
+                speed_mbps=$(echo "scale=2; 100 / $duration" | bc -l 2>/dev/null || echo "0")
+              else
+                speed_mbps=$(echo "scale=2; 100 / $duration" | awk '{printf "%.2f", $1}' 2>/dev/null || echo "0")
+              fi
+              
+              # Get file size for verification
+              file_size=$(du -h "$TEST_FILE" 2>/dev/null | cut -f1 || echo "Unknown")
+              
+              echo "100"
+              echo "XXX"
+              echo "Speed test complete!"
+              echo "Download speed: $speed_mbps MB/s"
+              echo "Time: ${duration%.*} seconds"
+              echo "File size: $file_size"
+              echo "Download path: $TEST_FILE"
+              echo "XXX"
+            else
+              echo "100"
+              echo "XXX"
+              echo "Speed test failed!"
+              echo "Could not download test file."
+              echo "XXX"
+            fi
+          ) | dialog --clear --title "🚀 Speed Test - Downloading 100MB" --gauge "Initializing..." 15 70 0
+          
+          # Ask if user wants to delete the test file
+          if [ -f "$TEST_FILE" ]; then
+            dialog --clear --yesno "Speed test completed!\n\nDownload path: $TEST_FILE\n\nDelete the 100MB test file to free up space?" 12 60
+            if [ $? -eq 0 ]; then
+              rm -f "$TEST_FILE"
+              dialog --clear --msgbox "Test file deleted." 6 40
+            else
+              dialog --clear --msgbox "Test file kept at: $TEST_FILE" 7 50
+            fi
+          fi
+        fi
+        ;;
+      
+      3)
+        # Network interfaces
+        if_data=$(ip addr show 2>/dev/null || ifconfig 2>/dev/null || echo "Network tools not available")
+        dialog --clear --title "🔌 Network Interfaces" --msgbox "$if_data" 20 70
+        ;;
+      
+      4)
+        # Ping test
+        target=$(dialog --clear --stdout --inputbox "Enter host to ping:" 10 50 "8.8.8.8")
+        if [ $? -eq 0 ] && [ -n "$target" ]; then
+          temp_ping="/tmp/ping_test.txt"
+          (ping -c 5 "$target" 2>&1 || echo "Ping failed") > "$temp_ping"
+          dialog --clear --title "🔄 Ping Results" --textbox "$temp_ping" 15 70
+          rm -f "$temp_ping"
+        fi
+        ;;
+      
+      5|"")
+        clear
+        show_banner
+        return 0
+        ;;
+    esac
+  done
+}
+
+# NEW: Keyboard Region/Layout Setup
+keyboard-setup() {
+  require_enabled_or_die "keyboard-setup" || return 1
+  
+  while true; do
+    choice=$(dialog --clear --stdout --backtitle "⌨️ Djinn Keyboard Setup" --menu "Keyboard Configuration" 15 60 5 \
+      1 "Set Keyboard Layout" \
+      2 "Set Timezone/Region" \
+      3 "Current Settings" \
+      4 "Apply Changes" \
+      5 "Exit") || { clear; show_banner; return 0; }
+    
+    case "$choice" in
+      1)
+        # Keyboard layout selection
+        layouts=(
+          "us" "English (US)"
+          "gb" "English (UK)"
+          "fr" "French"
+          "de" "German"
+          "es" "Spanish"
+          "it" "Italian"
+          "pt" "Portuguese"
+          "ru" "Russian"
+          "jp" "Japanese"
+          "cn" "Chinese"
+          "kr" "Korean"
+          "br" "Portuguese (Brazil)"
+          "tr" "Turkish"
+          "pl" "Polish"
+          "nl" "Dutch"
+          "se" "Swedish"
+          "no" "Norwegian"
+          "dk" "Danish"
+          "fi" "Finnish"
+        )
+        
+        current_layout=$(setxkbmap -query 2>/dev/null | grep layout | awk '{print $2}' || echo "us")
+        selected_layout=$(dialog --clear --stdout --menu "Select Keyboard Layout\nCurrent: $current_layout" 20 60 12 "${layouts[@]}")
+        
+        if [ $? -eq 0 ] && [ -n "$selected_layout" ]; then
+          # Try to set the layout
+          if setxkbmap "$selected_layout" 2>/dev/null; then
+            echo "KEYBOARD_LAYOUT=$selected_layout" > "/tmp/djinn_keyboard.conf"
+            dialog --clear --msgbox "✅ Keyboard layout set to: $selected_layout\n\nChanges will be applied permanently when you select 'Apply Changes'" 10 60
+          else
+            dialog --clear --msgbox "❌ Failed to set keyboard layout.\nThis might require root privileges." 8 60
+          fi
+        fi
+        ;;
+      
+      2)
+        # Timezone selection by region/city
+        if command -v timedatectl >/dev/null 2>&1; then
+          current_tz=$(timedatectl show --property=Timezone --value 2>/dev/null || echo "Unknown")
+          dialog --clear --msgbox "Current timezone: $current_tz\n\nFor Batocera, timezone is usually set in the system settings.\nYou can view available timezones with: timedatectl list-timezones" 12 60
+        else
+          # Manual timezone regions
+          regions=(
+            "America" "Americas"
+            "Europe" "Europe"
+            "Asia" "Asia"
+            "Africa" "Africa"
+            "Australia" "Australia/Pacific"
+            "Pacific" "Pacific Islands"
+          )
+          
+          selected_region=$(dialog --clear --stdout --menu "Select Region" 15 50 7 "${regions[@]}")
+          if [ $? -eq 0 ] && [ -n "$selected_region" ]; then
+            # Show some major cities for the region
+            case "$selected_region" in
+              "America")
+                cities=("New_York" "Los_Angeles" "Chicago" "Denver" "Phoenix")
+                ;;
+              "Europe")
+                cities=("London" "Paris" "Berlin" "Rome" "Madrid")
+                ;;
+              "Asia")
+                cities=("Tokyo" "Shanghai" "Singapore" "Hong_Kong" "Seoul")
+                ;;
+              "Africa")
+                cities=("Cairo" "Johannesburg" "Lagos" "Nairobi")
+                ;;
+              "Australia")
+                cities=("Sydney" "Melbourne" "Perth" "Brisbane")
+                ;;
+              "Pacific")
+                cities=("Auckland" "Fiji" "Honolulu")
+                ;;
+            esac
+            
+            city_opts=()
+            for city in "${cities[@]}"; do
+              city_opts+=("$selected_region/$city" "$city")
+            done
+            
+            selected_tz=$(dialog --clear --stdout --menu "Select City" 15 50 7 "${city_opts[@]}")
+            if [ $? -eq 0 ] && [ -n "$selected_tz" ]; then
+              echo "TIMEZONE=$selected_tz" > "/tmp/djinn_timezone.conf"
+              dialog --clear --msgbox "✅ Timezone set to: $selected_tz\n\nChanges will be applied when you select 'Apply Changes'" 10 60
+            fi
+          fi
+        fi
+        ;;
+      
+      3)
+        # Show current settings
+        current_info=""
+        
+        # Keyboard info
+        kb_info=$(setxkbmap -query 2>/dev/null | grep -E "layout|variant" || echo "Keyboard info not available")
+        current_info+="Keyboard:\n$kb_info\n\n"
+        
+        # Timezone info
+        if command -v timedatectl >/dev/null 2>&1; then
+          tz_info=$(timedatectl status | grep -E "Time zone|Local time" | head -2)
+          current_info+="Timezone:\n$tz_info"
+        else
+          current_info+="Timezone: timedatectl not available"
+        fi
+        
+        dialog --clear --title "⌨️ Current Settings" --msgbox "$current_info" 15 70
+        ;;
+      
+      4)
+        # Apply changes
+        changes_made=false
+        apply_msg="Applied changes:\n"
+        
+        # Apply keyboard changes
+        if [ -f "/tmp/djinn_keyboard.conf" ]; then
+          source "/tmp/djinn_keyboard.conf"
+          if [ -n "$KEYBOARD_LAYOUT" ]; then
+            if setxkbmap "$KEYBOARD_LAYOUT" 2>/dev/null; then
+              apply_msg+="✅ Keyboard: $KEYBOARD_LAYOUT\n"
+              changes_made=true
+            fi
+          fi
+        fi
+        
+        # Apply timezone changes (note: usually requires root)
+        if [ -f "/tmp/djinn_timezone.conf" ]; then
+          source "/tmp/djinn_timezone.conf"
+          if [ -n "$TIMEZONE" ] && command -v timedatectl >/dev/null 2>&1; then
+            dialog --clear --msgbox "Note: Setting timezone usually requires root privileges.\n\nYou can set it manually in Batocera system settings,\nor run: sudo timedatectl set-timezone $TIMEZONE" 12 60
+            apply_msg+="⏰ Timezone: $TIMEZONE (may require manual setup)\n"
+            changes_made=true
+          fi
+        fi
+        
+        if $changes_made; then
+          dialog --clear --msgbox "$apply_msg" 10 60
+        else
+          dialog --clear --msgbox "No changes to apply." 7 40
+        fi
+        
+        # Clean up temp files
+        rm -f "/tmp/djinn_keyboard.conf" "/tmp/djinn_timezone.conf"
+        ;;
+      
+      5|"")
+        clear
+        show_banner
+        return 0
+        ;;
+    esac
+  done
+}
+
 # FIXED: djinn-cheats - ALL file operations run from /userdata directory
 djinn-cheats() {
   require_enabled_or_die "djinn-cheats" || return 1
   while true; do
-    CH=$(dialog --clear --stdout --backtitle "🧞 Djinn Cheats" --menu "Tools" 22 80 12 \
+    CH=$(dialog --clear --stdout --backtitle "🧞 Djinn Cheats" --menu "Tools" 22 80 14 \
       1 "Backup / Restore (media-only)" \
       2 "Zip files/folders" \
       3 "Unzip archive" \
@@ -616,7 +922,9 @@ djinn-cheats() {
       5 "Extract SquashFS" \
       6 "System Info" \
       7 "Auto CMD Wine" \
-      8 "Exit") || { clear; show_banner; break; }
+      8 "Network Tools" \
+      9 "Keyboard Setup" \
+      10 "Exit") || { clear; show_banner; break; }
 
     case "$CH" in
       1)
@@ -737,7 +1045,13 @@ djinn-cheats() {
       7) # Auto CMD Wine
         auto-cmd-wine
         ;;
-      8|"") 
+      8) # Network Tools
+        network-tools
+        ;;
+      9) # Keyboard Setup
+        keyboard-setup
+        ;;
+      10|"") 
         clear
         show_banner
         break 
@@ -767,7 +1081,7 @@ djinn-play() {
 }
 
 # Export functions for interactive use
-export -f summon-djinn banish-djinn djinn-help djinn-what djinn-style djinn-cheats djinn-play djinn-king zynn auto-cmd-wine 2>/dev/null || true
+export -f summon-djinn banish-djinn djinn-help djinn-what djinn-style djinn-cheats djinn-play djinn-king zynn auto-cmd-wine network-tools keyboard-setup 2>/dev/null || true
 
 # On source: apply dialog and PS1/banners
 apply_dialog_from_config
@@ -777,7 +1091,7 @@ show_banner
 EOF
 
 chmod +x "$CUSTOM_SH"
-log "Installer: wrote FIXED FILE OPERATIONS runtime $CUSTOM_SH"
+log "Installer: wrote ENHANCED runtime $CUSTOM_SH with network-tools and keyboard-setup"
 
 # -----------------------------
 # Write uninstaller
@@ -841,11 +1155,11 @@ EOF
 chmod +x "$REINSTALL_SH"
 
 # -----------------------------
-# KING_STATE default (enable everything including auto-cmd-wine)
+# KING_STATE default (enable everything including new commands)
 # -----------------------------
 cat > "$KING_STATE" <<K
 # enabled commands (space-separated)
-summon-djinn banish-djinn djinn-style djinn-cheats djinn-play djinn-king zynn djinn-help djinn-what auto-cmd-wine
+summon-djinn banish-djinn djinn-style djinn-cheats djinn-play djinn-king zynn djinn-help djinn-what auto-cmd-wine network-tools keyboard-setup
 K
 
 # -----------------------------
@@ -855,7 +1169,7 @@ if [ -f "$BASHRC" ]; then
   if ! grep -qF "source $CUSTOM_SH" "$BASHRC"; then
     {
       echo ""
-      echo "# Djinn Terminal addon (installed by installer v14.1 FIXED FILE OPS)"
+      echo "# Djinn Terminal addon (installed by installer v14.3 ENHANCED)"
       echo "if [ -f \"$CUSTOM_SH\" ]; then source \"$CUSTOM_SH\"; fi"
     } >> "$BASHRC"
   fi
@@ -872,7 +1186,9 @@ fi
 clear
 cat <<BANNER
 ╔════════════════════════════════════════════════════════════════╗
-🎉 Djinn Terminal V14.2 — Beast Edition (FIXED FILE OPS) installed to: $BASE_DIR
+🎉 Djinn Terminal V14.3 — Beast Edition (ENHANCED) installed to: $BASE_DIR
+  - ADDED: network-tools command with Wi-Fi status and speed test
+  - ADDED: keyboard-setup command for region/layout configuration
   - FIXED: ALL file operations run from /userdata directory
   - zip/unzip/squashfs/unsquashfs now work correctly
   - REMOVED: move, copy, delete functions
@@ -891,5 +1207,5 @@ if [ -f "$INSTALLER_PATH" ]; then rm -f "$INSTALLER_PATH" 2>/dev/null || true; e
 sleep 1
 clear
 echo "✅ Installation finished. Open a new shell or run: source $CUSTOM_SH"
-echo "FIXED: zip/unzip/squashfs/unsquashfs now run from /userdata directory!"
+echo "NEW: Use 'network-tools' for Wi-Fi and speed tests, 'keyboard-setup' for region/layout!"
 exit 0
