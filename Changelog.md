@@ -18,7 +18,6 @@ Each version refines the art of command-line magic within Batocera. 🧞‍♂�
 
 ### 🔧 Structural Refinements  
 - **🧹 Purged Redundant Spells**: Removed move, copy, and delete functions from `djinn-cheats`
-- **🧭 Path Perfection**: All file operations (zip/unzip/squashfs) now properly start in `/userdata` directory
 - **📜 Command Scrolls Updated**: 
   - `djinn-cheats` menu reorganized with "Auto CMD Wine" as option 7
   - `KING_STATE` now includes `auto-cmd-wine` in enabled commands
@@ -28,7 +27,6 @@ Each version refines the art of command-line magic within Batocera. 🧞‍♂�
 ### 🎯 Technical Incantations
 - **File Operations Fixed**: zip/unzip/squashfs/unsquashfs now run from `/userdata` directory with proper relative paths
 - **Dialog Flow Enhanced**: Consistent error handling and banner reloading across all commands
-- **Path Construction**: Clean path handling with no double slashes or directory issues
 
 ---
 
