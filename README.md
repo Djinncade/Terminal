@@ -1,59 +1,81 @@
-# 🧞 DjinnCade Terminal Setup V14.2
+# 🧞 DjinnCade Terminal Setup V14.4
 
-A single-file installer that brings the **DjinnCade Terminal Addon** to your Batocera system — complete with custom themes, dialog-based menus, backups, and a touch of magic. ✨  
-
-This setup adds a custom DjinnCade-styled terminal experience, blending functionality and flair right inside Batocera.
+> *"When the terminal speaks in ancient tongues, the Djinn shall answer."*
 
 ---
 
-## 🎮 What It Does
+## 🎮 **What the Djinn Brings**
 
-The **DjinnCade Terminal Addon** enhances Batocera's terminal with:
+A magical terminal upgrade for Batocera with:
 
-- 🧱 Interactive dialog-based menus  
-- 🎨 Color themes and style customization  
-- 💾 Safe backup and restore tools (SquashFS-based)  
-- 📦 File tools (zip/unzip/squashfs compression)
-- 🍷 Wine automation with autorun.cmd creation
-- 💬 Custom PS1 prompt styling  
-- ⚙️ System info display (uptime, version, storage)  
-- 🔄 Themed installer and uninstaller system  
-- 🧞 Built-in command shortcuts for quick access to every feature  
+- 🧱 **Dialog menus** that speak your language
+- 🎨 **Color magic** for your prompt and dialogs  
+- 💾 **Safe backups** that don't eat your files
+- 🌐 **Network spells** - Wi-Fi, speed tests, scanning
+- ⌨️ **Keyboard alchemy** - 40+ layouts, timezone magic
+- 🍷 **Wine whispers** - autorun.cmd creation
+- 🛡️ **File protection** - no accidental destruction
 
 ---
 
-### 🎮 Custom Commands List
+## ⚡ **Quick Summoning**
 
-After installation, you'll have access to several DjinnCade commands that make managing and customizing Batocera faster and easier.  
+```bash
+chmod +x djinncade-terminal-setup-V14.4.sh
+./djinncade-terminal-setup-V14.4.sh
+```
 
-| Command | Function |
-|----------|-----------|
-| `summon-djinn` | Switches your terminal prompt to **Djinn Mode** (🔮 symbol + alternate PS1 colors). |
-| `banish-djinn` | Reverts the terminal back to normal mode. |
-| `djinn-style` | Opens the **Style Selector** — customize PS1 colors, dialog themes, and overall terminal look. |
-| `djinn-cheats` | Opens the **Cheats & Tools Menu** — includes backup/restore, zip/unzip, SquashFS handling, and system info utilities. |
-| `auto-cmd-wine` | Automatically creates autorun.cmd files for Wineprefixes. |
-| `djinn-help` | Displays the **DjinnCade Help Menu**, showing visible commands and quick usage tips. |
-
-🪄 *Extra commands exist but are not listed here 😉.*
-
-Everything runs from **one single script** — no extra dependencies needed besides `bash` and `dialog`.
+*The installer vanishes when its work is done, leaving only magic behind.*
 
 ---
 
-## ⚙️ Installation
+## 🪄 **Command Scrolls**
 
-1. Copy or download the setup script anywhere on your Batocera system —  
-   you can place it in `/userdata/`, `/share/`, or any other folder you like.
+| Spell | Effect |
+|-------|--------|
+| `summon-djinn` | 🔮 Switch to enchanted prompt |
+| `banish-djinn` | 🧞 Return to mortal shell |
+| `djinn-style` | 🎨 Change colors and themes |
+| `djinn-cheats` | 🛠️ Backup, zip, system tools |
+| `network-tools` | 🌐 Wi-Fi, speed tests, scanning |
+| `keyboard-setup` | ⌨️ Language and timezone magic |
+| `auto-cmd-wine` | 🍷 Create Wine autorun spells |
 
-2. Open a terminal or connect via SSH, then make it executable:
-   ```bash
-   chmod +x djinncade-terminal-setup-V14.2.sh
-   ```
+---
 
-3. Run the installer:
-   ```bash
-   ./djinncade-terminal-setup-V14.2.sh
-   ```
+## 🛡️ **The Djinn's Protection**
 
-The installer will automatically set up everything and remove itself when finished.
+> *"Your files are safe under my watch. No accidental destruction shall occur."*
+
+- ✅ **Asks before overwriting anything**
+- 🔍 **Shows what will change**
+- 🎯 **Only touches what you permit**
+
+---
+
+## 🏁 **Begin Your Journey**
+
+After installation, open a new terminal or speak:
+```bash
+source /userdata/system/djinncade-addons/terminal/custom.sh
+```
+
+**Try these first spells:**
+```bash
+network-tools    # Scan the airwaves
+djinn-cheats     # Access all utilities  
+djinn-style      # Paint your terminal
+```
+
+---
+
+## 🧹 **Banish the Djinn**
+
+If you must send the magic away:
+```bash
+/userdata/system/djinncade-addons/terminal/djinncade-uninstall.sh
+```
+
+---
+
+*May your commands be swift and your terminals magical!* 🔮✨
