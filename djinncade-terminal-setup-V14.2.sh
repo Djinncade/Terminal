@@ -1,6 +1,6 @@
 #!/bin/bash
-# === DJINN TERMINAL MASTER INSTALLER V14 — Beast Edition (FIXED) ===
-# DjinnCade Terminal Setup V14
+# === DJINN TERMINAL MASTER INSTALLER V14.2 — Beast Edition (FIXED) ===
+# DjinnCade Terminal Setup V14.2
 # Copyright (c) 2025 DjinnCade Project
 # Licensed under the MIT License – see the LICENSE file for details.
 #
@@ -31,7 +31,7 @@ log() { printf '%s %s\n' "$(date '+%F %T')" "$*" >> "$LOG_FILE"; }
 # Dialog-theme chooser (install-time only)
 # -----------------------------
 clear
-dialog --backtitle "🧞 Djinn Installer v14.1" --yesno "Pick a dialog theme now? (This sets dialog colors only; PS1/terminal colors are handled by djinn-style later.)" 10 60
+dialog --backtitle "🧞 Djinn Installer v14.2" --yesno "Pick a dialog theme now? (This sets dialog colors only; PS1/terminal colors are handled by djinn-style later.)" 10 60
 if [ $? -eq 0 ]; then
   THEME=$(dialog --stdout --backtitle "Djinn Dialog Themes" --menu "Choose dialog theme:" 16 70 6 \
     1 "Emerald Blaze (Green on Black)" \
@@ -79,7 +79,7 @@ log "Installer: wrote initial style config to $STYLE_CONF (theme $THEME)"
 # -----------------------------
 cat > "$CUSTOM_SH" <<'EOF'
 #!/bin/bash
-# Djinn Terminal v14.1 — Beast Edition (runtime) - FIXED FILE OPS
+# Djinn Terminal v14.2 — Beast Edition (runtime) - FIXED FILE OPS
 # Fixed: ALL file operations run from /userdata directory
 # Removed: move, copy, delete functions
 # Added: auto-cmd-wine command
@@ -872,7 +872,7 @@ fi
 clear
 cat <<BANNER
 ╔════════════════════════════════════════════════════════════════╗
-🎉 Djinn Terminal V14.1 — Beast Edition (FIXED FILE OPS) installed to: $BASE_DIR
+🎉 Djinn Terminal V14.2 — Beast Edition (FIXED FILE OPS) installed to: $BASE_DIR
   - FIXED: ALL file operations run from /userdata directory
   - zip/unzip/squashfs/unsquashfs now work correctly
   - REMOVED: move, copy, delete functions
