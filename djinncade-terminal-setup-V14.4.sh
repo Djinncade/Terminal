@@ -1,9 +1,11 @@
 #!/bin/bash
-# === DJINN TERMINAL MASTER INSTALLER V14.3 — Beast Edition (ENHANCED) ===
-# DjinnCade Terminal Setup V14.3
+# === DJINN TERMINAL MASTER INSTALLER V14.4 — File Safety Edition ===
+# DjinnCade Terminal Setup V14.4
 # Copyright (c) 2025 DjinnCade Project
 # Licensed under the MIT License – see the LICENSE file for details.
 #
+# FIXED: All file operations now only overwrite specific target files
+# FIXED: zip/unzip/squashfs/unsquashfs properly handle existing files
 # Added: network-tools command with Wi-Fi status and speed test
 # Added: keyboard-setup command for region/layout configuration
 # Fixed: ALL file operations run from /userdata directory
@@ -33,7 +35,7 @@ log() { printf '%s %s\n' "$(date '+%F %T')" "$*" >> "$LOG_FILE"; }
 # Dialog-theme chooser (install-time only)
 # -----------------------------
 clear
-dialog --backtitle "🧞 Djinn Installer v14.3" --yesno "Pick a dialog theme now? (This sets dialog colors only; PS1/terminal colors are handled by djinn-style later.)" 10 60
+dialog --backtitle "🧞 Djinn Installer v14.4" --yesno "Pick a dialog theme now? (This sets dialog colors only; PS1/terminal colors are handled by djinn-style later.)" 10 60
 if [ $? -eq 0 ]; then
   THEME=$(dialog --stdout --backtitle "Djinn Dialog Themes" --menu "Choose dialog theme:" 16 70 6 \
     1 "Emerald Blaze (Green on Black)" \
@@ -59,7 +61,7 @@ esac
 
 # Default PS1 preset
 cat > "$STYLE_CONF" <<EOF
-# djinn-style config (written by installer v14.3)
+# djinn-style config (written by installer v14.4)
 PS1_PRESET="Classic Djinn"
 PROMPT_SYMBOL_COLOR="RED"
 PROMPT_USER_COLOR="CYAN"
@@ -77,11 +79,13 @@ EOF
 log "Installer: wrote initial style config to $STYLE_CONF (theme $THEME)"
 
 # -----------------------------
-# Write runtime custom.sh - ENHANCED VERSION
+# Write runtime custom.sh - FILE SAFETY EDITION
 # -----------------------------
 cat > "$CUSTOM_SH" <<'EOF'
 #!/bin/bash
-# Djinn Terminal v14.3 — Beast Edition (runtime) - ENHANCED
+# Djinn Terminal v14.4 — File Safety Edition
+# FIXED: All file operations now only overwrite specific target files
+# FIXED: zip/unzip/squashfs/unsquashfs properly handle existing files
 # Added: network-tools command with Wi-Fi status and speed test
 # Added: keyboard-setup command for region/layout configuration
 # Fixed: ALL file operations run from /userdata directory
@@ -910,7 +914,7 @@ keyboard-setup() {
   done
 }
 
-# FIXED: djinn-cheats - ALL file operations run from /userdata directory
+# FIXED: djinn-cheats - ALL file operations with proper overwrite protection
 djinn-cheats() {
   require_enabled_or_die "djinn-cheats" || return 1
   while true; do
@@ -981,25 +985,45 @@ djinn-cheats() {
         clear
         show_banner
         ;;
-      2) # Zip - FIXED: runs from /userdata directory
+      2) # Zip - FIXED: Only overwrites specific zip file
         FOLDER=$(file_browser "Select folder to ZIP" "/userdata") || { clear; show_banner; continue; }
         DST=$(file_browser "Select DESTINATION for zip file" "/userdata") || { clear; show_banner; continue; }
         ZIP_NAME="$DST/$(get_filename "$FOLDER").zip"
+        
+        # Check if zip file already exists
+        if [ -f "$ZIP_NAME" ]; then
+            dialog --clear --yesno "Zip file already exists:\n$ZIP_NAME\n\nOverwrite it?" 10 60
+            if [ $? -ne 0 ]; then
+                clear; show_banner; continue
+            fi
+            rm -f "$ZIP_NAME"
+        fi
+        
         # FIXED: Run from /userdata directory
         (cd /userdata && zip -r "$ZIP_NAME" "${FOLDER#/userdata/}" >/dev/null 2>&1) && dialog --clear --msgbox "✅ Zipped to $ZIP_NAME" 7 60
         clear
         show_banner
         ;;
-      3) # Unzip - FIXED: runs from /userdata directory
+      3) # Unzip - FIXED: Only extracts files, doesn't overwrite destination folder
         ZIPF=$(file_browser "Select zip file to UNZIP" "/userdata") || { clear; show_banner; continue; }
         case "${ZIPF##*.}" in zip) true ;; *) dialog --clear --msgbox "❌ Not a .zip file" 7 50; clear; show_banner; continue ;; esac
         DST=$(file_browser "Select extraction folder" "/userdata") || { clear; show_banner; continue; }
-        # FIXED: Run from /userdata directory
+        
+        # Check if files will be overwritten
+        conflict_files=$(cd /userdata && unzip -l "$ZIPF" | awk 'NR>3 {print $4}' | while read -r file; do [ -f "$DST/$file" ] && echo "$file"; done)
+        if [ -n "$conflict_files" ]; then
+            dialog --clear --yesno "Some files already exist in destination:\n\n$(echo "$conflict_files" | head -10)\n\nOverwrite existing files?" 15 70
+            if [ $? -ne 0 ]; then
+                clear; show_banner; continue
+            fi
+        fi
+        
+        # FIXED: Run from /userdata directory with overwrite flag
         (cd /userdata && unzip -o "$ZIPF" -d "$DST" >/dev/null 2>&1) && dialog --clear --msgbox "✅ Unzipped to $DST" 7 60
         clear
         show_banner
         ;;
-      4) # Create SquashFS - FIXED: runs from /userdata directory
+      4) # Create SquashFS - FIXED: Only overwrites specific squashfs file
         if ! command -v mksquashfs >/dev/null 2>&1; then dialog --clear --msgbox "❌ mksquashfs not installed!" 7 50; clear; show_banner; continue; fi
         F=$(file_browser "Select folder for SquashFS" "/userdata") || { clear; show_banner; continue; }
         mapfile -t MEDIA < <(find /media -mindepth 1 -maxdepth 1 -type d 2>/dev/null || true)
@@ -1010,18 +1034,37 @@ djinn-cheats() {
         fi
         if [ -z "$DST" ]; then DST=$(file_browser "Select DESTINATION for SquashFS" "/userdata") || { clear; show_banner; continue; }; fi
         OUT="$DST/$(basename "$F").squashfs"
+        
+        # Check if squashfs file already exists
+        if [ -f "$OUT" ]; then
+            dialog --clear --yesno "SquashFS file already exists:\n$OUT\n\nOverwrite it?" 10 60
+            if [ $? -ne 0 ]; then
+                clear; show_banner; continue
+            fi
+            rm -f "$OUT"
+        fi
+        
         # FIXED: Run from /userdata directory with relative path
         (cd /userdata && mksquashfs "${F#/userdata/}" "$OUT" -comp zstd -noappend -progress 2>&1 | awk '/%/ { match($0,/([0-9]{1,3})%/,a); if(a[1]){ print a[1]; fflush(); } }' ) | dialog --clear --title "🧞 Creating SquashFS" --gauge "Compressing..." 10 70 0
         dialog --clear --msgbox "✅ Created: $OUT" 7 60
         clear
         show_banner
         ;;
-      5) # Extract SquashFS - FIXED: runs from /userdata directory
+      5) # Extract SquashFS - FIXED: Only overwrites files from the squashfs, not entire folder
         if ! command -v unsquashfs >/dev/null 2>&1; then dialog --clear --msgbox "❌ unsquashfs not installed!" 7 50; clear; show_banner; continue; fi
         SF=$(file_browser "Select SquashFS to extract" "/userdata") || { clear; show_banner; continue; }
         DST=$(file_browser "Select extraction folder" "/userdata") || { clear; show_banner; continue; }
-        if [ "$(ls -A "$DST" 2>/dev/null)" ]; then dialog --clear --yesno "⚠️ Destination not empty: $DST\nOverwrite?" 10 60; [ $? -ne 0 ] && { clear; show_banner; continue; }; fi
-        # FIXED: Run from /userdata directory
+        
+        # Check for file conflicts
+        conflict_check=$(unsquashfs -l "$SF" 2>/dev/null | grep -v "squashfs-root" | while read -r line; do file="${line#*/}"; [ -f "$DST/$file" ] && echo "$file"; done | head -5)
+        if [ -n "$conflict_check" ]; then
+            dialog --clear --yesno "Some files already exist in destination:\n\n$conflict_check\n\nOverwrite existing files?" 12 70
+            if [ $? -ne 0 ]; then
+                clear; show_banner; continue
+            fi
+        fi
+        
+        # FIXED: Run from /userdata directory with force overwrite
         (cd /userdata && unsquashfs -f -d "$DST" "$SF" 2>&1 | awk '/%/ { match($0,/([0-9]{1,3})%/,a); if(a[1]){ print a[1]; fflush(); } }' ) | dialog --clear --title "🧞 Extracting SquashFS" --gauge "Extracting..." 10 70 0
         dialog --clear --msgbox "✅ Extracted to $DST" 7 60
         clear
@@ -1091,7 +1134,7 @@ show_banner
 EOF
 
 chmod +x "$CUSTOM_SH"
-log "Installer: wrote ENHANCED runtime $CUSTOM_SH with network-tools and keyboard-setup"
+log "Installer: wrote FILE SAFETY EDITION runtime $CUSTOM_SH"
 
 # -----------------------------
 # Write uninstaller
@@ -1169,7 +1212,7 @@ if [ -f "$BASHRC" ]; then
   if ! grep -qF "source $CUSTOM_SH" "$BASHRC"; then
     {
       echo ""
-      echo "# Djinn Terminal addon (installed by installer v14.3 ENHANCED)"
+      echo "# Djinn Terminal addon (installed by installer v14.4 FILE SAFETY EDITION)"
       echo "if [ -f \"$CUSTOM_SH\" ]; then source \"$CUSTOM_SH\"; fi"
     } >> "$BASHRC"
   fi
@@ -1186,11 +1229,12 @@ fi
 clear
 cat <<BANNER
 ╔════════════════════════════════════════════════════════════════╗
-🎉 Djinn Terminal V14.3 — Beast Edition (ENHANCED) installed to: $BASE_DIR
+🎉 Djinn Terminal V14.4 — File Safety Edition installed to: $BASE_DIR
+  - FIXED: All file operations now only overwrite specific target files
+  - FIXED: zip/unzip/squashfs/unsquashfs properly handle existing files
   - ADDED: network-tools command with Wi-Fi status and speed test
   - ADDED: keyboard-setup command for region/layout configuration
   - FIXED: ALL file operations run from /userdata directory
-  - zip/unzip/squashfs/unsquashfs now work correctly
   - REMOVED: move, copy, delete functions
   - ADDED: auto-cmd-wine command for autorun.cmd creation
   - runtime: $CUSTOM_SH
@@ -1207,5 +1251,5 @@ if [ -f "$INSTALLER_PATH" ]; then rm -f "$INSTALLER_PATH" 2>/dev/null || true; e
 sleep 1
 clear
 echo "✅ Installation finished. Open a new shell or run: source $CUSTOM_SH"
-echo "NEW: Use 'network-tools' for Wi-Fi and speed tests, 'keyboard-setup' for region/layout!"
+echo "NEW: File operations now safely handle existing files - no more accidental overwrites!"
 exit 0
