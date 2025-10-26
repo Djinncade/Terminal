@@ -1,155 +1,150 @@
-# 🧾 DjinnCade Changelog
-
-A record of the Djinn's blessings, bug banishments, and terminal enchantments.  
-Each version refines the art of command-line magic within Batocera. 🧞‍♂️  
+# 🧾 **DjinnCade Changelog**
 
 ---
 
-## 🛡️ V14.4 – *File Safety Guardian Edition* (2025-10-27)
+## 🏗️ **V15 — Modular Architecture Edition** *(Current)*
 
-> "The Djinn now guards your files with watchful eyes, preventing accidental destruction while maintaining powerful file operations."
+### **Core Architecture**
+- **Complete modular rewrite** - All functionality split into core libraries and feature modules
+- **Clean separation** - Core utilities (`cores/`) vs. feature modules (`modules/`)
+- **Centralized loader** - `custom.sh` orchestrates all components
+- **Enhanced maintainability** - One feature per file for easy debugging
 
-### 🛡️ **Safety Enchantments**
-- **🛡️ File Overwrite Protection**: No more accidental folder destruction
-  - **Smart Conflict Detection**: Shows exactly which files will be overwritten
-  - **User Confirmation Required**: Always asks before replacing any files
-  - **Targeted Operations**: Only specific files are replaced, never entire folders
-  - **Clear Visual Feedback**: Users know exactly what's happening at each step
+### **New Directory Structure**
+```
+/userdata/system/djinncade-addons/terminal/
+├── custom.sh (main loader)
+├── cores/
+│   ├── core-dialog.sh (UI & theming)
+│   ├── core-permissions.sh (command system)  
+│   └── core-display.sh (PS1 & banners)
+└── modules/
+    ├── module-basic.sh (core commands)
+    ├── module-style.sh (PS1 & dialog themes)
+    ├── module-cheats.sh (file operations)
+    ├── module-network.sh (Wi-Fi, speed tests)
+    ├── module-keyboard.sh (layout & timezone)
+    └── module-wine.sh (autorun.cmd creator)
+```
 
-### 🔧 **Fixed File Operations**
-- **📦 Zip Operations**: Now only overwrites the specific zip file, asks first
-- **📤 Unzip Operations**: Detects file conflicts, shows list, confirms before overwriting
-- **🗜️ SquashFS Creation**: Safe file replacement with user approval
-- **📂 SquashFS Extraction**: Conflict detection and selective file overwriting
+### **Ports Integration** 🎮
+- **Full Ports launcher** - `djinn-cheats.sh` in Ports menu
+- **Complete gamepad support** - 8-player `.keys` configuration
+- **Custom dialog styling** - Uses `/userdata/system/djinncade-add-ons/.dialogrc`
+- **Seamless EmulationStation integration**
 
-### ✨ **Enhanced User Experience**
-- **🎯 Precise Control**: Users maintain complete control over file operations
-- **🔍 Transparency**: See exactly what will change before it happens
-- **🔄 Safe Recovery**: Accidental clicks no longer lead to data loss
-- **📋 Conflict Lists**: View which specific files will be affected
+### **Enhanced Features**
+- **8 Complete Themes** - Classic Terminal to CRT Amber
+- **Safe File Operations** - Conflict detection & confirmation dialogs
+- **Network Diagnostics** - Wi-Fi status, speed tests, ping utilities
+- **Keyboard Configuration** - 40+ layouts with region settings
+- **Wine Integration** - Auto Wineprefix detection & autorun.cmd creation
 
----
-
-## 🐉 V14.3 – *Network & Keyboard Mastery Edition* (2025-10-26)
-
-> "The Djinn now commands the airwaves and types in every tongue, bringing network diagnostics and keyboard configuration to your fingertips."
-
-### ✨ New Enchantments
-- **🌐 Network Tools**: Comprehensive network diagnostics command
-  - Wi-Fi status and signal quality monitoring
-  - Network interface information display
-  - Internet speed test with 100MB download and MB/s calculation
-  - Ping testing with customizable targets
-  - Available network scanning capabilities
-
-- **⌨️ Keyboard Setup**: Regional and layout configuration
-  - Keyboard layout selection (40+ languages supported)
-  - Timezone/region configuration by city
-  - Current settings display and validation
-  - Batocera-compatible configuration handling
-
-### 🔧 Enhanced Spells
-- **🧹 File Operation Purification**: All file operations now strictly run from `/userdata` directory
-  - Fixed zip/unzip path handling with proper relative paths
-  - SquashFS creation/extraction now uses correct working directory
-  - Eliminated potential path confusion in file browser
-
-- **🎯 Dialog Flow Mastery**: Consistent clearing and banner restoration across all commands
-  - Proper dialog cleanup after every operation
-  - Unified error handling and user experience
-  - Smooth transitions between menu levels
-
-### 📜 Command Scrolls Updated
-- `djinn-cheats` menu expanded with Network Tools (option 8) and Keyboard Setup (option 9)
-- `KING_STATE` includes new `network-tools` and `keyboard-setup` commands
-- Help system updated to showcase new capabilities
-- Export lists expanded for all new functions
+### **Fixed Issues** ✅
+- **Save & Exit functionality** - Proper config persistence in `djinn-style`
+- **Command permissions** - Robust enable/disable system
+- **File safety** - No accidental overwrites, all operations in `/userdata`
+- **Clean exit behavior** - Proper return to EmulationStation from Ports
 
 ---
 
-## 🐉 V14.2 – *Wine Wizardry Edition* (2025-10-25)
+## 🛡️ **V14.4 — File Safety Guardian Edition** *(2025-10-27)*
 
-> "The Djinn now speaks the language of Windows, crafting autorun spells for Wine realms."
-
-### ✨ New Enchantments
-- **🧩 Auto CMD Wine**: Intelligent `autorun.cmd` creation for Wineprefixes
-  - Automatically detects Wineprefix directories in `/userdata/roms/windows/` and `/userdata/system/wine-bottles/windows/`
-  - Smart path handling with conditional `DIR=` statements
-  - Proper quoting for executables with spaces in filenames
-  - Batch processing for multiple Wineprefixes
-
-### 🔧 Structural Refinements  
-- **🧹 Purged Redundant Spells**: Removed move, copy, and delete functions from `djinn-cheats`
-- **📜 Command Scrolls Updated**: 
-  - `djinn-cheats` menu reorganized with "Auto CMD Wine" as option 7
-  - `KING_STATE` includes `auto-cmd-wine` in enabled commands
-  - Export list expanded for Wine automation function
+### **Safety Improvements**
+- File conflict detection before overwriting
+- Confirmation dialogs for all destructive operations
+- File-level replacements only (no folder wipes)
+- Safe zip/unzip and SquashFS operations
+- All file actions confined to `/userdata` directory
 
 ---
 
-## 🐉 V14.1 – *Beast Edition* (2025-10-24)
+## 🐉 **V14.3 — Network & Keyboard Edition** *(2025-10-26)*
 
-> "When the Beast awakens, the terminal roars with power."
+### **Network Tools**
+- Wi-Fi status and interface information
+- Network scanning and signal strength
+- Internet speed testing (100MB download metrics)
+- Ping diagnostics and connectivity testing
 
-- 🧹 Refined uninstall rituals for a cleaner exit  
-- 🎨 Enhanced theme selector — no more color chaos  
-- ⚡ Streamlined dialog flow and improved responsiveness  
-- 🧠 Polished internal logic and error handling  
-- 🧾 Prepared for future modular expansion  
-
----
-
-## 🔮 V14 – *The Summoning* (2025-10-10)
-
-> "The first spark of the DjinnCade Terminal — the wish was granted."
-
-- 🌟 Initial public release  
-- 🧭 Interactive terminal menus and theme system  
-- 💾 Backup and restore functionality  
-- 🧠 System info, file tools, and prompts  
-- 🧞 Fully contained within `/userdata/system/djinncade-addons/terminal/`
+### **Keyboard Setup**
+- 40+ international keyboard layouts
+- Timezone and region configuration
+- Batocera-compatible settings application
+- Current settings display and preview
 
 ---
 
-## 🎯 **Technical Achievements (V14.4)**
+## 🪄 **V14.2 — Wine Wizardry Edition** *(2025-10-25)*
 
-### 🛡️ **Safety Features**
-- **No More Accidental Overwrites**: File operations only replace specific target files
-- **Conflict Detection**: Shows users exactly what will be overwritten
-- **Mandatory Confirmation**: Always asks before overwriting anything
-- **Clear Visual Feedback**: Users know exactly what's happening
-
-### 🔧 **File Operation Security**
-- **Zip Safety**: Only overwrites the specific zip file after confirmation
-- **Unzip Intelligence**: Detects file conflicts and shows affected files
-- **SquashFS Protection**: Safe creation and extraction with user approval
-- **Targeted Operations**: Never wipes entire folders accidentally
-
-### 🌐 **Network & International**
-- **Network Diagnostics**: Complete Wi-Fi and connectivity analysis
-- **International Support**: 40+ keyboard layouts and global timezones  
-- **Path Safety**: All file operations secured to `/userdata` directory
-- **Performance**: Optimized speed testing with proper MB/s calculations
+### **Wine Integration**
+- Automatic Wineprefix detection in multiple locations
+- Executable file discovery (.exe, .bat, .com)
+- Smart autorun.cmd generation with path handling
+- Safe directory navigation and selection
 
 ---
 
-### 🧞 **The Journey Continues...**
-Each version brings the DjinnCade Terminal closer to perfection.  
-Your wishes, feedback, and pull requests guide the next summoning. ✨
+## 🐉 **V14.1 — Beast Edition** *(2025-10-24)*
 
-**Next Incantations Planned:**
-- 🎮 **Controller Configuration Helper** - Advanced input mapping and profiles
-- 🔧 **System Performance Suite** - Real-time monitoring and optimization
-- 🌐 **Remote Access Tools** - SSH and network management
-- 📦 **Plugin Architecture** - Community spell contributions
-- 🗂️ **Advanced File Management** - Batch operations and smart organization
+### **System Improvements**
+- Clean uninstall process with confirmation
+- Enhanced theme selector with previews
+- Better error handling and user feedback
+- Performance optimizations throughout
 
-**Known Limitations:**
-- Some network operations may require additional permissions
-- Timezone changes might need Batocera system-level configuration
-- Wi-Fi scanning depends on available wireless tools
+---
 
-### 🛡️ **Safety Philosophy**
-> *"The Djinn believes in powerful magic, but never at the cost of your precious files. Every operation is guarded, every change is confirmed, and your data remains safe under our watchful protection."*
+## 🔮 **V14 — The Summoning** *(2025-10-10)*
 
-*May your commands be swift, your files be safe, and your terminals magical!* 🔮🛡️✨
+### **Initial Release**
+- Interactive dialog-based menus
+- Custom theme system with color presets
+- Backup and restore functionality
+- System information and monitoring tools
+- Basic file operations and utilities
+
+---
+
+## 🚀 **Technical Specifications**
+
+### **Command System**
+- **12 Core Commands**: `summon-djinn` to `keyboard-setup`
+- **Permission Management**: Enable/disable via `djinn-king`
+- **Function Export**: All commands available in shell
+- **Modular Loading**: Dynamic function availability
+
+### **Theme System**
+- **8 Dialog Themes**: Classic Terminal, Midnight Blue, Emerald Forest, Inferno Red, Royal Purple, Solarized Dark, Matrix Green, CRT Amber
+- **PS1 Customization**: Symbol, user, path, and text colors
+- **Live Preview**: Instant theme application
+
+### **File Operations**
+- **Backup/Restore**: SquashFS compression to external media
+- **Archive Tools**: Zip creation and extraction
+- **SquashFS**: Filesystem image creation and mounting
+- **Safe Operations**: All actions require confirmation
+
+---
+
+## 🧞 **Future Roadmap**
+
+### **Planned Features**
+- **Controller configuration** - Gamepad mapping tools
+- **Performance monitoring** - System resource dashboards  
+- **SSH & remote management** - Network administration
+- **Plugin support** - Extensible module system
+- **Batch file tools** - Automated task processing
+- **Dynamic module loader** - Runtime feature addition
+- **System dashboard** - Comprehensive status overview
+
+### **Enhancements**
+- Additional theme packs and customization
+- Expanded network diagnostics
+- Enhanced Wine and Windows compatibility
+- Mobile-friendly interface options
+- Community plugin repository
+
+---
+
+**DjinnCade Terminal — Modular. Powerful. Refined.** 🧞‍♂️
