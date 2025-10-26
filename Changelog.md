@@ -130,12 +130,7 @@
 ## 🧞 **Future Roadmap**
 
 ### **Planned Features**
-- **Controller configuration** - Gamepad mapping tools
 - **Performance monitoring** - System resource dashboards  
-- **SSH & remote management** - Network administration
-- **Plugin support** - Extensible module system
-- **Batch file tools** - Automated task processing
-- **Dynamic module loader** - Runtime feature addition
 - **System dashboard** - Comprehensive status overview
 
 ### **Enhancements**
