@@ -1,145 +1,96 @@
-# 🧾 **DjinnCade Changelog**
+# 🧞 **DjinnCade Changelog**
+
+*A tale of terminal magic through the ages*
 
 ---
 
-## 🏗️ **V15 — Modular Architecture Edition** *(Current)*
+## 🎮 **V16 — The Wine Whisperer** *(Current)*
 
-### **Core Architecture**
-- **Complete modular rewrite** - All functionality split into core libraries and feature modules
-- **Clean separation** - Core utilities (`cores/`) vs. feature modules (`modules/`)
-- **Centralized loader** - `custom.sh` orchestrates all components
-- **Enhanced maintainability** - One feature per file for easy debugging
+**New Enchantments:**
+- 🍷 **Multi-genre gamepad mapping** for Windows games
+- 🎯 **Game type selection first** - smarter file browsing
+- 🕹️ **Auto-controller detection** - all pads, all players
+- 📁 **Organized game management** by platform
 
-### **New Directory Structure**
-```
-/userdata/system/djinncade-addons/terminal/
-├── custom.sh (main loader)
-├── cores/
-│   ├── core-dialog.sh (UI & theming)
-│   ├── core-permissions.sh (command system)  
-│   └── core-display.sh (PS1 & banners)
-└── modules/
-    ├── module-basic.sh (core commands)
-    ├── module-style.sh (PS1 & dialog themes)
-    ├── module-cheats.sh (file operations)
-    ├── module-network.sh (Wi-Fi, speed tests)
-    ├── module-keyboard.sh (layout & timezone)
-    └── module-wine.sh (autorun.cmd creator)
-```
+**Fixed Spells:**
+- ⚡ **Fast permission returns** - no more waiting
+- 🎮 **Cleaner gamepad config** - Player 1 & 2 only
+- 🔒 **Hidden config files** - tidy home directory
+- 🧹 **Auto-cleanup** - script vanishes after install
 
-### **Ports Integration** 🎮
-- **Full Ports launcher** - `djinn-cheats.sh` in Ports menu
-- **Complete gamepad support** - 8-player `.keys` configuration
-- **Custom dialog styling** - Uses `/userdata/system/djinncade-add-ons/.dialogrc`
-- **Seamless EmulationStation integration**
-
-### **Enhanced Features**
-- **8 Complete Themes** - Classic Terminal to CRT Amber
-- **Safe File Operations** - Conflict detection & confirmation dialogs
-- **Network Diagnostics** - Wi-Fi status, speed tests, ping utilities
-- **Keyboard Configuration** - 40+ layouts with region settings
-- **Wine Integration** - Auto Wineprefix detection & autorun.cmd creation
-
-### **Fixed Issues** ✅
-- **Save & Exit functionality** - Proper config persistence in `djinn-style`
-- **Command permissions** - Robust enable/disable system
-- **File safety** - No accidental overwrites, all operations in `/userdata`
-- **Clean exit behavior** - Proper return to EmulationStation from Ports
+**Genre Magic:**
+- 🎯 FPS (CoD, Battlefield)
+- ⚔️ RPG (Skyrim, Witcher)  
+- 🏎️ Racing (Need for Speed)
+- 🦔 Platformer (Hollow Knight)
+- 🥊 Fighting (Street Fighter)
+- ♟️ Strategy (Civilization)
 
 ---
 
-## 🛡️ **V14.4 — File Safety Guardian Edition** *(2025-10-27)*
+## 🏗️ **V15 — The Architect** *(Previous)*
 
-### **Safety Improvements**
-- File conflict detection before overwriting
-- Confirmation dialogs for all destructive operations
-- File-level replacements only (no folder wipes)
-- Safe zip/unzip and SquashFS operations
-- All file actions confined to `/userdata` directory
+**Structural Magic:**
+- 🧱 **Complete modular rewrite** - cores vs modules
+- 🎨 **8 mystical themes** - Classic to CRT Amber
+- 🎮 **Ports integration** - full gamepad support
+- 🛡️ **Safe file operations** - no accidental wipes
 
----
-
-## 🐉 **V14.3 — Network & Keyboard Edition** *(2025-10-26)*
-
-### **Network Tools**
-- Wi-Fi status and interface information
-- Network scanning and signal strength
-- Internet speed testing (100MB download metrics)
-- Ping diagnostics and connectivity testing
-
-### **Keyboard Setup**
-- 40+ international keyboard layouts
-- Timezone and region configuration
-- Batocera-compatible settings application
-- Current settings display and preview
+**Tool Arsenal:**
+- 📦 Backup/Restore to external media
+- 🌐 Network diagnostics & speed tests  
+- ⌨️ 40+ keyboard layouts
+- 🍷 Wine autorun creation
 
 ---
 
-## 🪄 **V14.2 — Wine Wizardry Edition** *(2025-10-25)*
+## 🛡️ **V14.4 — The Guardian**
 
-### **Wine Integration**
-- Automatic Wineprefix detection in multiple locations
-- Executable file discovery (.exe, .bat, .com)
-- Smart autorun.cmd generation with path handling
-- Safe directory navigation and selection
+*File safety spells and confirmation charms*
 
 ---
 
-## 🐉 **V14.1 — Beast Edition** *(2025-10-24)*
+## 🐉 **V14.3 — The Network Sage** 
 
-### **System Improvements**
-- Clean uninstall process with confirmation
-- Enhanced theme selector with previews
-- Better error handling and user feedback
-- Performance optimizations throughout
+*Wi-Fi wisdom and keyboard lore*
 
 ---
 
-## 🔮 **V14 — The Summoning** *(2025-10-10)*
+## 🪄 **V14.2 — The Wine Wizard**
 
-### **Initial Release**
-- Interactive dialog-based menus
-- Custom theme system with color presets
-- Backup and restore functionality
-- System information and monitoring tools
-- Basic file operations and utilities
+*First steps into Windows game automation*
 
 ---
 
-## 🚀 **Technical Specifications**
+## 🔮 **V14 — The Summoning**
 
-### **Command System**
-- **12 Core Commands**: `summon-djinn` to `keyboard-setup`
-- **Permission Management**: Enable/disable via `djinn-king`
-- **Function Export**: All commands available in shell
-- **Modular Loading**: Dynamic function availability
-
-### **Theme System**
-- **8 Dialog Themes**: Classic Terminal, Midnight Blue, Emerald Forest, Inferno Red, Royal Purple, Solarized Dark, Matrix Green, CRT Amber
-- **PS1 Customization**: Symbol, user, path, and text colors
-- **Live Preview**: Instant theme application
-
-### **File Operations**
-- **Backup/Restore**: SquashFS compression to external media
-- **Archive Tools**: Zip creation and extraction
-- **SquashFS**: Filesystem image creation and mounting
-- **Safe Operations**: All actions require confirmation
+*Where the magic began*
 
 ---
 
-## 🧞 **Future Roadmap**
+## 🧭 **Technical Grimoire**
 
-### **Planned Features**
-- **Performance monitoring** - System resource dashboards  
-- **System dashboard** - Comprehensive status overview
+**Command Craft:**
+- 9 core spells (`summon-djinn` to `djinn-what`)
+- 3 hidden arts (Wine/Network/Keyboard via cheats)
+- Permission weaving via `djinn-king`
 
-### **Enhancements**
-- Additional theme packs and customization
-- Expanded network diagnostics
-- Enhanced Wine and Windows compatibility
-- Mobile-friendly interface options
-- Community plugin repository
+**Theme Weaving:**
+- 8 dialog color schemes
+- PS1 personalization
+- Live preview magic
+
+**File Sorcery:**
+- SquashFS compression
+- Safe conflict detection
+- Platform-aware organization
 
 ---
 
-**DjinnCade Terminal — Modular. Powerful. Refined.** 🧞‍♂️
+## 🔭 **Crystal Ball** *(Future Magic)*
+
+**Coming Spells:**
+- 🎮 Visual gamepad mapper
+- 📊 Real-time system dashboards  
+
+**Every version tells a story — V16 writes the wine chapter** 🍷✨
