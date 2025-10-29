@@ -9,6 +9,8 @@
 # FIXED: Only Player 1 & 2 gamepad support (removed players 3-8)
 # FIXED: Removed wine/network/keyboard from main commands (cheats only)
 # FIXED: Fast return after permission denied messages
+# FIXED: Autorun.cmd now creates correct DIR= and CMD= format (no @echo off, cd, etc.)
+# FIXED: SquashFS creation now asks for destination and offers delete original option for ALL game types
 # NEW: Enhanced auto-wine-tools module with multi-genre gamepad mapping system
 # NEW: Improved djinn-cheats with game type selection BEFORE file browser for SquashFS
 # NEW: Complete Wine automation with autorun.cmd and controller config
@@ -827,6 +829,7 @@ cat > "$MODULES_DIR/module-cheats.sh" <<'EOF'
 #!/bin/bash
 # Module: djinn-cheats - Complete file operations and system tools
 # UPDATED: Always ask game type BEFORE opening file browser for Create/Extract SquashFS
+# FIXED: SquashFS creation now asks for destination and offers delete original option for ALL game types
 
 djinn-cheats() {
   require_enabled_or_die "djinn-cheats" || return 1
@@ -987,9 +990,9 @@ djinn-cheats() {
           4 "Cancel") || { clear; show_banner; continue; }
 
         case "$GAME_TYPE" in
-          1) START_DIR="/userdata/roms/windows"; DST="/userdata/roms/windows"; mkdir -p "$DST"; GAME_TYPE_NAME="Windows" ;;
-          2) START_DIR="/userdata/roms/ps3"; DST="/userdata/roms/ps3"; mkdir -p "$DST"; GAME_TYPE_NAME="PS3" ;;
-          3) START_DIR="/userdata"; DST="/userdata"; GAME_TYPE_NAME="Other" ;;
+          1) START_DIR="/userdata/roms/windows"; DEFAULT_DST="/userdata/roms/windows"; mkdir -p "$DEFAULT_DST"; GAME_TYPE_NAME="Windows" ;;
+          2) START_DIR="/userdata/roms/ps3"; DEFAULT_DST="/userdata/roms/ps3"; mkdir -p "$DEFAULT_DST"; GAME_TYPE_NAME="PS3" ;;
+          3) START_DIR="/userdata"; DEFAULT_DST="/userdata"; GAME_TYPE_NAME="Other" ;;
           4) clear; show_banner; continue ;;
         esac
 
@@ -997,12 +1000,32 @@ djinn-cheats() {
         F=$(file_browser "Select folder to create SquashFS from" "${START_DIR}") || { clear; show_banner; continue; }
 
         BASE_NAME=$(basename "$F")
-        OUT="$DST/${BASE_NAME}.squashfs"
+        
+        # FIX 1: Handle Windows game file extensions
+        if [ "$GAME_TYPE" = "1" ]; then
+          # Remove .wine extension if present for Windows games
+          BASE_NAME=$(echo "$BASE_NAME" | sed 's/\.wine$//')
+          EXTENSION=".wsquashfs"
+        else
+          EXTENSION=".squashfs"
+        fi
+
+        # FIX 2: Ask for destination folder
+        DST=$(file_browser "Select DESTINATION folder for the SquashFS file" "${DEFAULT_DST}") || { clear; show_banner; continue; }
+        
+        OUT="$DST/${BASE_NAME}${EXTENSION}"
 
         if [ -f "$OUT" ]; then
           dialog --clear --yesno "SquashFS file already exists:\n$OUT\n\nOverwrite it?" 10 60
           if [ $? -ne 0 ]; then clear; show_banner; continue; fi
           rm -f "$OUT"
+        fi
+
+        # FIX 3: Ask if user wants to delete original folder after successful compression (for ALL game types)
+        DELETE_ORIGINAL="no"
+        dialog --clear --yesno "🎮 $GAME_TYPE_NAME game detected!\n\nSource: $F\nOutput: $OUT\n\nDelete original folder after successful compression?" 12 70
+        if [ $? -eq 0 ]; then
+          DELETE_ORIGINAL="yes"
         fi
 
         dialog --clear --msgbox "🎮 Creating $GAME_TYPE_NAME Game SquashFS:\n\nSource: $F\nDestination: $OUT\n\nThis may take a while..." 12 70
@@ -1011,7 +1034,20 @@ djinn-cheats() {
           awk '/%/ { match($0,/([0-9]{1,3})%/,a); if(a[1]){ print a[1]; fflush(); } }' ) | \
           dialog --clear --title "🧞 Creating $GAME_TYPE_NAME Game SquashFS" --gauge "Compressing..." 10 70 0
 
-        dialog --clear --msgbox "✅ $GAME_TYPE_NAME Game SquashFS Created!\n\nLocation: $OUT" 10 70
+        # FIX 4: Delete original folder if requested and compression was successful
+        if [ "$DELETE_ORIGINAL" = "yes" ] && [ -f "$OUT" ]; then
+          dialog --clear --yesno "✅ Compression successful!\n\nDelete original folder?\n$F" 12 70
+          if [ $? -eq 0 ]; then
+            rm -rf "$F"
+            DELETION_MSG="\n🗑️ Original folder deleted."
+          else
+            DELETION_MSG="\n💾 Original folder kept."
+          fi
+        else
+          DELETION_MSG=""
+        fi
+
+        dialog --clear --msgbox "✅ $GAME_TYPE_NAME Game SquashFS Created!\n\nLocation: $OUT$DELETION_MSG" 10 70
         ;;
 
       5)
@@ -1041,7 +1077,7 @@ djinn-cheats() {
 
         # Validate extension (optional)
         case "${SF##*.}" in
-          squashfs|sqfs) true ;;
+          squashfs|sqfs|wsquashfs) true ;;
           *) 
             dialog --clear --yesno "Selected file does not look like a .squashfs file.\n\nContinue anyway?" 10 60
             if [ $? -ne 0 ]; then clear; show_banner; continue; fi
@@ -1377,6 +1413,7 @@ cat > "$MODULES_DIR/module-wine-tools.sh" <<'EOF'
 #!/bin/bash
 # Module: module-wine-tools.sh - Complete Wine automation tools
 # UPDATED: Multi-genre gamepad mapping system
+# FIXED: Autorun.cmd now creates correct DIR= and CMD= format
 
 auto-wine-tools() {
   # No permission check - only called from djinn-cheats
@@ -1430,7 +1467,7 @@ find_wineprefixes() {
 }
 
 # ==========================================================
-# FUNCTION: Create autorun.cmd
+# FUNCTION: Create autorun.cmd - FIXED VERSION
 # ==========================================================
 create_autorun() {
   while true; do
@@ -1465,11 +1502,12 @@ create_autorun() {
       continue
     fi
 
-    # Build file menu with relative paths
+    # Build file menu with relative paths FROM THE PREFIX ROOT
     file_options=()
     for file in "${files[@]}"; do
-      rel=$(realpath --relative-to="$selected_prefix" "$file" 2>/dev/null || echo "$file")
-      file_options+=("$rel" "")
+      # Get path relative to the Wine prefix
+      rel_path=$(realpath --relative-to="$selected_prefix" "$file" 2>/dev/null || echo "$file")
+      file_options+=("$rel_path" "$rel_path")
     done
 
     selected_file=$(dialog --clear --stdout --title "Select Executable" \
@@ -1477,11 +1515,14 @@ create_autorun() {
       20 80 10 "${file_options[@]}")
     [ $? -ne 0 ] && break
 
-    # Create autorun.cmd
+    # Parse the selected file path to get directory and filename
     exe_dir=$(dirname "$selected_file")
     exe_file=$(basename "$selected_file")
     
-    # Handle spaces in filenames
+    # Convert Windows path separators if needed and ensure it's relative to prefix
+    exe_dir=$(echo "$exe_dir" | sed 's#^\./##')  # Remove leading ./
+    
+    # Handle spaces in filenames - quote only the CMD, not the DIR
     if [[ "$exe_file" == *" "* ]]; then
       exe_cmd="\"$exe_file\""
     else
@@ -1489,17 +1530,18 @@ create_autorun() {
     fi
 
     autorun_file="$selected_prefix/autorun.cmd"
+    
+    # Create the autorun.cmd with the EXACT format you specified
     {
-      echo "@echo off"
-      [ "$exe_dir" != "." ] && echo "cd /d \"$exe_dir\""
-      echo "echo Starting $exe_file..."
-      echo "$exe_cmd"
-      echo "if errorlevel 1 pause"
+      echo "DIR=$exe_dir"
+      echo "CMD=$exe_cmd"
     } > "$autorun_file"
 
     chmod +x "$autorun_file"
 
-    dialog --msgbox "✅ autorun.cmd created successfully!\n\nLocation: $autorun_file\n\nContents:\ncd \"$exe_dir\"\n$exe_cmd" 13 60
+    # Show the created file contents for verification
+    file_contents=$(cat "$autorun_file")
+    dialog --msgbox "✅ autorun.cmd created successfully!\n\nLocation: $autorun_file\n\nContents:\n$file_contents" 15 70
 
     dialog --yesno "Create another autorun.cmd?" 7 40
     [ $? -ne 0 ] && break
